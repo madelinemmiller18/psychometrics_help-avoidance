@@ -1,0 +1,40 @@
+# Virtual Environments
+venv/
+env/
+ENV/
+.venv/
+.ENV/
+
+# R files
+.Rhistory
+.RData
+.Rproj.user
+*.Rproj
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.Python
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+Thumbs.db
+ehthumbs.db
+
+# Data files (uncomment if you want to exclude CSV files)
+# *.csv
+
+# PDF outputs (uncomment if you don't want to track PDFs)
+# *.pdf
+
+# IDE
+.vscode/
+.idea/
