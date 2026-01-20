@@ -111,10 +111,11 @@ f1 =~ explain_hs + quiet_ha + support_hs + feedback_ha + participation_ha
 '
 
 # two factor model - positively and negatively coded items
-pn_coding_model2 <- '
+# equality constraint added to "nc" in order to identify, as only two items
+pn_coding_model <- '
 pc =~ quiet_ha + feedback_ha + participation_ha 
   + taskhelp_ha + pretunderstand_ha + clarification_ha + workown_ha
-nc =~ explain_hs + support_hs
+nc =~ l1*explain_hs + l1*support_hs 
 '
 # two factor model - human coded items and ChatGPT items 
 ai_model2 <- '
