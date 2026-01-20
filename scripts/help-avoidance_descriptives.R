@@ -1,5 +1,5 @@
 print(getwd())
-path="~/Desktop/psychometrics_foundations/Help_Avoidance"
+path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
 setwd(path)
 
 #Install libraries
