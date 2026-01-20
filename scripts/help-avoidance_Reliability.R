@@ -9,7 +9,7 @@ library(lavaan) #  library for CFA and structural equation modeling (SEM)
 library(dplyr)
 
 ###############################################################
-# ANALYSIS
+# set up data
 ###############################################################
 #upload data
 rawdata <- read.csv("data/Help Avoidance in Group Projects.csv")
@@ -18,8 +18,6 @@ rawdata$id <- 1:nrow(rawdata) #Add ID column
 dim(rawdata) # dimension
 head(rawdata) # first entries
 # save the relevant item labels
-item_data <- rawdata[c(15,3:11)]
-cov_data <- rawdata[c(15,12:14)]
 df <- rawdata[c(3:14)]
 
 #change column names

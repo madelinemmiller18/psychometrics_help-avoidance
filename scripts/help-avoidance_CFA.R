@@ -86,14 +86,14 @@ item_names <- colnames(df[1:9])
 ###############################################################
 
 # For now, we just use the item information, not the covariates
-df1 <- df[,item_names]
+dfitems <- df[,item_names]
 #correlation matrix
-round(cor(df1), 2)
+round(cor(dfitems), 2)
 #explain_hs and support_hs should be reversed (negative).
 # So, we re-code by subtracting the response value from 
 # the maximum score plus 1 (which is 7 in this case)
-df1[,"explain_hs"] <- 7-df1[,"explain_hs"]
-df1[,"support_hs"] <- 7-df1[,"support_hs"]
+dfitems[,"explain_hs"] <- 7-dfitems[,"explain_hs"]
+dfitems[,"support_hs"] <- 7-dfitems[,"support_hs"]
 
 
 
@@ -132,7 +132,7 @@ pa2 =~ support_hs + feedback_ha + taskhelp_ha + workown_ha
 ##########################################################################
 
 # run model 1
-cfa1 <- cfa(model1,df1,std.lv=T)
+cfa1 <- cfa(model1,dfitems,std.lv=T)
 
 # output
 summary(cfa1,standardized=T,fit=T)
@@ -152,7 +152,7 @@ cov1
 ##########################################################################
 
 # run model pn
-cfa_pn <- cfa(pn_coding_model2,df1,std.lv=T)
+cfa_pn <- cfa(pn_coding_model2,dfitems,std.lv=T)
 
 # output
 summary(cfa_pn,standardized=T)
@@ -167,7 +167,7 @@ cov_pn <- round(resid(cfa_pn,type="standardized")$cov,2)
 cov_pn
 
 # run model ai
-cfa_ai <- cfa(ai_model2,df1,std.lv=T)
+cfa_ai <- cfa(ai_model2,dfitems,std.lv=T)
 
 # output
 summary(cfa_ai,standardized=T)
@@ -182,7 +182,7 @@ cov_ai <- round(resid(cfa_ai,type="standardized")$cov,2)
 cov_ai
 
 # run model 2
-cfa2 <- cfa(model2,df1,std.lv=T)
+cfa2 <- cfa(model2,dfitems,std.lv=T)
 
 # output
 summary(cfa2,standardized=T)
@@ -243,7 +243,7 @@ pa2 =~ support_hs + feedback_ha + taskhelp_ha + workown_ha
 pa1 ~~ 0*pa2              # this constraint sets the correlation to zero
 '
 # Run the model
-cfa3 <- cfa(model3,df1,std.lv=T)
+cfa3 <- cfa(model3,dfitems,std.lv=T)
 # Model comparison to correlated factors model (nested models)
 anova(cfa2, cfa3)
 # -> p-value 0.05244 > 0.05 -> no significant difference between the models
