@@ -21,10 +21,10 @@
 ###############################################################
 
 print(getwd())
-# path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
-# figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/descriptives/"
-path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
-figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\descriptives\\"
+path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
+figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/descriptives/"
+#path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
+#figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\descriptives\\"
 setwd(path)
 
 #Install libraries
@@ -34,7 +34,7 @@ library(lubridate) # handling and manipulation of date and time data
 library(dplyr)
 
 #upload data
-rawdata <- read.csv("Help Avoidance in Group Projects.csv")
+rawdata <- read.csv("data/Help Avoidance in Group Projects.csv")
 rawdata$id <- 1:nrow(rawdata) #Add ID column
 
 dim(rawdata) # dimension

@@ -31,10 +31,10 @@
 ################################################################
 
 print(getwd())
-# path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
-# figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/cfa/"
-path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
-figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\cfa\\"
+path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
+figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/cfa/"
+#path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
+#figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\cfa\\"
 setwd(path)
 
 
@@ -46,9 +46,9 @@ library(dplyr)
 library(car) #use qqplot function
 library(lavaan) # library for CFA and structural equation modeling (SEM)
 library(semPlot) # library for visualizing SEM path diagrams
-
+library(tidyr)
 # upload data
-rawdata <- read.csv("Help Avoidance in Group Projects.csv")
+rawdata <- read.csv("data/Help Avoidance in Group Projects.csv")
 df <- rawdata[c(3:14)]
 
 # change column names
@@ -276,10 +276,47 @@ cfa2 <- cfa(model2,dfitems,std.lv=T)
 
 # output
 summary(cfa2,standardized=T,fit=T)
+fitMeasures(cfa2, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
 # plot path diagram with standardized factor loadings
+
+# Custom item labels
+# Your custom item labels
+item_labels <- c(
+  "1\nConcepts", 
+  "2\nMeetings", 
+  "5\nParticpat", 
+  "7\nDiscussn", 
+  "8\nClarificat",
+  "3\nContribut\nSupport", 
+  "4\nFeedack\nMy Work", 
+  "6\nHelp\nMy Task", 
+  "9\nCollabor\nTask"
+)
+
+# Latent factor names in the order semPaths expects
+latent_names <- c("General", "OwnTask")
+
+# Combine latent + observed labels
+node_labels <- c(item_labels,latent_names)
+
+#comment one out if you want a png or pdf returned
 pdf(paste0(figures_path,"cfa2_GenOwned.pdf"), width = 7, height = 5)
-semPaths(cfa2, "std",nCharNodes = 0)
+#png(paste0(figures_path, "cfa2_GenOwned.png"), width = 7, height = 5, units = "in", res = 300)
+# 3. Plot with nodeLabels
+semPaths(
+  cfa2,
+  "std",
+  nodeLabels = node_labels, #updates to new labels
+  nCharNodes = 0,         # show full multi-line labels
+  sizeMan = 8, # item size
+  sizeLat = 8, #latent variable size
+  edge.label.cex = 0.9,  # makes loading numbers bigger/smaller
+  node.width = 1, #width of item boxes
+  mar = c(4, 4, 4, 4), 
+  edge.color = "#000080" #update edge color
+)
 dev.off()
+
 # -> moderate to high factor loadings for all items
 
 # calculate the residual covariance as standardized z-values
@@ -319,6 +356,7 @@ anova(cfa2,cfa1)
 # Create a list with different changes and the expected decrease in the
 # chi-square statistic (mi) as measure for the model fit improvement
 mi <- modindices(cfa2, sort. = T)
+mi
 # show all mi > 3.84 (significant)
 mi[mi$mi>3.84,]
 #                  lhs op         rhs   mi    epc sepc.lv sepc.all sepc.nox
@@ -400,3 +438,90 @@ model_llm <- '
 cfa_llm <- cfa(model_llm, dfitems_llm, std.lv = TRUE)
 summary(cfa_llm, standardized = T, fit = T)
 # very poor fit 
+
+#fitmeasures -----------------
+fitMeasures(cfa2, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
+# Extract fit measures
+fit_cfa2 <- fitMeasures(cfa2, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
+fit_cfa2_mod <- fitMeasures(cfa2_mod, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
+fit_cfa3 <- fitMeasures(cfa3, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
+fit_cfa1 <- fitMeasures(cfa1, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
+fit_cfa_pn <- fitMeasures(cfa_pn, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
+fit_cfa_ai <- fitMeasures(cfa_ai, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
+
+# Combine into data frame
+fit_table <- data.frame(
+  Model = c("GenOwn_2f", "GenOwn_Mod","GenOwn_Unc","One Factor", "Pos/Neg Coding 2f", "AI vs Human 2f"),
+  ChiSq = c(fit_cfa2["chisq"], fit_cfa2_mod["chisq"], fit_cfa3["chisq"], fit_cfa1["chisq"], fit_cfa_pn["chisq"], fit_cfa_ai["chisq"]),
+  df = c(fit_cfa2["df"], fit_cfa2_mod["df"], fit_cfa3["df"], fit_cfa1["df"], fit_cfa_pn["df"], fit_cfa_ai["df"]),
+  pvalue = c(fit_cfa2["pvalue"], fit_cfa2_mod["pvalue"], fit_cfa3["pvalue"], fit_cfa1["pvalue"], fit_cfa_pn["pvalue"], fit_cfa_ai["pvalue"]),
+  RMSEA = c(fit_cfa2["rmsea"], fit_cfa2_mod["rmsea"], fit_cfa3["rmsea"], fit_cfa1["rmsea"], fit_cfa_pn["rmsea"], fit_cfa_ai["rmsea"]),
+  SRMR = c(fit_cfa2["srmr"], fit_cfa2_mod["srmr"], fit_cfa3["srmr"], fit_cfa1["srmr"], fit_cfa_pn["srmr"], fit_cfa_ai["srmr"]),
+  CFI = c(fit_cfa2["cfi"], fit_cfa2_mod["cfi"], fit_cfa3["cfi"], fit_cfa1["cfi"], fit_cfa_pn["cfi"], fit_cfa_ai["cfi"]),
+  TLI = c(fit_cfa2["tli"], fit_cfa2_mod["tli"], fit_cfa3["tli"], fit_cfa1["tli"], fit_cfa_pn["tli"], fit_cfa_ai["tli"])
+)
+
+# Round for display
+fit_table <- fit_table %>%
+  mutate(across(c(ChiSq, RMSEA, SRMR, CFI, TLI), ~round(.x, 3)),
+         pvalue = round(pvalue, 4))
+
+print(fit_table)
+
+# Reshape for plotting (exclude chisq, df, pvalue)
+fit_long <- fit_table %>%
+  select(Model, pvalue, RMSEA, SRMR, CFI, TLI) %>%
+  pivot_longer(cols = c(pvalue, RMSEA, SRMR, CFI, TLI), 
+               names_to = "Index", 
+               values_to = "Value")
+
+# Add thresholds for acceptable fit
+thresholds <- data.frame(
+  Index = c("pvalue","RMSEA", "SRMR", "CFI", "TLI"),
+  Threshold = c(.05, 0.06, 0.08, 0.95, 0.95),
+  Direction = c("higher", "lower", "lower", "higher", "higher"),  # lower is better for RMSEA/SRMR
+  Label = c("p > .05", "< .06", "< .08", "> .95", "> .95")  
+)
+
+# Set factor order to control plot sequence
+fit_long$Index <- factor(fit_long$Index, 
+                         levels = c("pvalue", "RMSEA", "SRMR", "CFI", "TLI"))
+thresholds$Index <- factor(thresholds$Index, 
+                           levels = c("pvalue", "RMSEA", "SRMR", "CFI", "TLI"))
+
+fit_long <- fit_long %>%
+  left_join(thresholds, by = "Index") %>%
+  mutate(Acceptable = case_when(
+    Direction == "lower" & Value <= Threshold ~ "Yes",
+    Direction == "higher" & Value >= Threshold ~ "Yes",
+    TRUE ~ "No"
+  ))
+
+# Create plot
+p <- ggplot(fit_long, aes(x = Model, y = Value, fill = Acceptable)) +
+  geom_col(position = "dodge") +
+  geom_hline(data = thresholds, aes(yintercept = Threshold), 
+             linetype = "dashed", color = "red", linewidth = 0.8, alpha = 0.4) +
+  geom_text(data = thresholds, 
+            aes(x = 0.4, y = Threshold, label = Label),
+            hjust = 0, vjust = -0.5, size = 2.5, fontface = "bold", 
+            inherit.aes = FALSE) +
+  geom_text(aes(label = sprintf("%.2f", Value)), 
+            vjust = -0.5, size = 3.5, fontface = "bold") +
+  facet_wrap(~Index, scales = "free_y", nrow = 1) +
+  scale_fill_manual(values = c("Yes" = "blue", "No" = "orange")) +
+  labs(title = "CFA Model Fit Comparison",
+       subtitle = "Red dashed lines indicate acceptable fit thresholds",
+       x = NULL,
+       y = "Fit Index Value") +
+  theme_minimal(base_size = 14) +
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    legend.position = "bottom",
+    plot.title = element_text(face = "bold", hjust = 0.5),
+    plot.subtitle = element_text(hjust = 0.5),
+    strip.text = element_text(face = "bold", size = 12)
+  )
+
+ggsave(paste0(figures_path, "cfa_fit_comparison.png"),
+       p, width = 12, height = 6, dpi = 300)

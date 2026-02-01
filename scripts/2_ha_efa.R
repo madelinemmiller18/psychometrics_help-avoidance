@@ -17,10 +17,10 @@
 ################################################################
 
 print(getwd())
-# path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
-# figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/efa/"
-path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
-figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\efa\\"
+path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
+figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/efa/"
+#path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
+#figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\efa\\"
 setwd(path)
 
 # Install libraries
@@ -32,9 +32,14 @@ library(MVN) # library for multivariate normal distributions
 library(GPArotation) # library for rotating factors
 library(dplyr)
 library(car) #use qqplot function
+#for returning tables
+library(gridExtra)
+library(grid)
+library(tidyr)
+library(ggplot2)
 
 # upload data
-rawdata <- read.csv("Help Avoidance in Group Projects.csv")
+rawdata <- read.csv("data/Help Avoidance in Group Projects.csv")
 df <- rawdata[c(3:14)]
 
 # change column names
@@ -123,7 +128,8 @@ dfitems[,"support_hs"] <- 7-dfitems[,"support_hs"]
 #################################
 
 # Plot the scree plot
-pdf(paste0(figures_path,"scree_plot.pdf"), width = 7, height = 5)
+#pdf(paste0(figures_path,"scree_plot.pdf"), width = 7, height = 5)
+png(paste0(figures_path, "scree_plot.png"), width = 7, height = 5, units = "in", res = 300)
 fa1 <- fa.parallel(dfitems, # data frame of just our items
                    fm="ml", # estimation method maximum likelihood
                    # (allows for hypothesis testing, is based on
@@ -133,6 +139,13 @@ fa1 <- fa.parallel(dfitems, # data frame of just our items
 # among variables (not the total as in PCA)
 # Add mean eigenvalue as horizontal line for the Kaiser Guttman criterion
 abline(h=mean(fa1$fa.values),lty=2,col="black")
+mean = round(mean(fa1$fa.values),2)
+# Add label to the line
+text(x = 5, y = mean(fa1$fa.values), 
+     labels = paste0("Kaiser Criterion (Mean Eigen = ",mean,")"), 
+     pos = 3, # position above the line (1=below, 2=left, 3=above, 4=right)
+     cex = 0.8, # text size
+     col = "black")
 dev.off()
 # As the function outputs, all criteria (ellbow, KG and parallel analysis)
 #=elbow: 3
@@ -350,6 +363,69 @@ print(obli)
 # -> use Oblimin for rotation
 # !!!
 
+#Return table of factor loadings
+#nice item names: 
+item_labels <- c(
+  "I1: Concepts", 
+  "I2: Meetings", 
+  "I3: Contribut Support", 
+  "I4: Feedack My Work", 
+  "I5: Particpat", 
+  "I6: Help My Task", 
+  "I7: Discussn", 
+  "I8: Clarificat",
+  "I9 CollaborTask"
+)
+
+# Build table
+loadings_df <- as.data.frame(unclass(obli$loadings))
+rownames(loadings_df) <- item_labels
+loadings_df <- round(loadings_df, 3)
+
+# Save as PNG
+png(paste0(figures_path,"factor_loadings.png"), width = 1200, height = 800, res = 150)
+grid.table(loadings_df)
+dev.off()
+#------------------------------------------ return PNG of loadings
+loadings_df <- as.data.frame(unclass(obli$loadings))
+rownames(loadings_df) <- item_labels
+loadings_df$item <- rownames(loadings_df)
+
+plot_df <- loadings_df %>%
+  pivot_longer(c(PA1, PA2), names_to = "Factor", values_to = "Loading") %>%
+  group_by(item) %>%
+  mutate(is_primary = abs(Loading) == max(abs(Loading))) %>%
+  ungroup()
+
+p <- ggplot(plot_df, aes(x = Factor, y = item)) +
+  geom_text(
+    aes(label = sprintf("%.2f", Loading),
+        fontface = ifelse(is_primary, "bold", "plain")),
+    size = 7
+  ) +
+  scale_y_discrete(limits = (item_labels)) +
+  scale_x_discrete(position = "top") + 
+  labs(
+    title = "Oblimin-Rotated Factor Loadings",
+    x = NULL,
+    y = NULL
+  ) +
+  theme_minimal(base_size = 18) +
+  theme(
+    panel.grid = element_blank(),
+    axis.text.x = element_text(face = "bold"),
+    plot.title = element_text(face = "bold", hjust = 0.5)
+  )
+
+ggsave(
+  paste0(figures_path,"factor_loadings.png"),
+  p,
+  width = 8,
+  height = 6,
+  dpi = 300
+)
+#--------------------------------------------------------
+
 # Plot results to easier interpret the solutions
 par(mfrow=c(1,2))
 pdf(paste0(figures_path,"varimax_initial_loadings.pdf"), width = 7, height = 5)
@@ -434,9 +510,9 @@ PA1 <- PA2 <- matrix(0,dim(initial_loadings)[1],dim(initial_loadings)[2])
 # restricted to load only on 2,4-9
 PA1[1:9,1] <- PA2[c(3,4,6,9), 2] <- NA
 # Perform orthogonal rotation with target L31
-t2ort1 <- targetT(A=initial_loadings, Target=PA1)
+t2ort2 <- targetT(A=initial_loadings, Target=PA1)
 
-print(t2ort1)
+print(t2ort2)
 # Loadings:
 #                     PA1     PA2
 # explain_hs        0.620 -0.0962
