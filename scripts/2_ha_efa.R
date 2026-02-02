@@ -141,7 +141,7 @@ fa1 <- fa.parallel(dfitems, # data frame of just our items
 abline(h=mean(fa1$fa.values),lty=2,col="black")
 mean = round(mean(fa1$fa.values),2)
 # Add label to the line
-text(x = 5, y = mean(fa1$fa.values), 
+text(x = 7, y = mean(fa1$fa.values), 
      labels = paste0("Kaiser Criterion (Mean Eigen = ",mean,")"), 
      pos = 3, # position above the line (1=below, 2=left, 3=above, 4=right)
      cex = 0.8, # text size
@@ -485,6 +485,7 @@ L31 <- L32 <- matrix(0, dim(initial_loadings)[1], dim(initial_loadings)[2])
 L31[1:9, 1] <- L31[c(1,3), 2] <- NA
 t2ort1 <- targetT(A=initial_loadings, Target=L31)
 print(t2ort1)
+
 # Loadings:
 #                     PA1     PA2
 # explain_hs        0.620 -0.0962
@@ -513,6 +514,8 @@ PA1[1:9,1] <- PA2[c(3,4,6,9), 2] <- NA
 t2ort2 <- targetT(A=initial_loadings, Target=PA1)
 
 print(t2ort2)
+
+summary(t2ort2)
 # Loadings:
 #                     PA1     PA2
 # explain_hs        0.620 -0.0962
@@ -530,8 +533,8 @@ par(mfrow=c(1,2))
 pdf(paste0(figures_path,"bifactor_hs.pdf"), width = 7, height = 5)
 pl.fa2(t2ort1, "Bifactor (HS specific)", fa2=fa.start)
 dev.off()
-pdf(paste0(figures_path,"bifactor_ha.pdf"), width = 7, height = 5)
-pl.fa2(t2ort2, "Bifactor (HA specific)", fa2=fa.start)
+pdf(paste0(figures_path,"bifactor_genown.pdf"), width = 7, height = 5)
+pl.fa2(t2ort2, "Bifactor GenOwn", fa2=fa.start)
 dev.off()
 # -> Don't separate cleanly
 

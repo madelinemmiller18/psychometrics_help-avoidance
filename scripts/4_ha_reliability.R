@@ -18,10 +18,10 @@
 
 #set working directory
 print(getwd())
-# path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
-# figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/reliability/"
-path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
-figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\reliability\\"
+path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
+figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/reliability/"
+#path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
+#figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\reliability\\"
 setwd(path)
 
 
@@ -34,7 +34,7 @@ library(dplyr)
 # set up data
 ###############################################################
 # upload data
-rawdata <- read.csv("Help Avoidance in Group Projects.csv")
+rawdata <- read.csv("data/Help Avoidance in Group Projects.csv")
 df <- rawdata[c(3:14)]
 
 # change column names
@@ -117,7 +117,6 @@ dfitems[,"support_hs"] <- 7-dfitems[,"support_hs"]
 
 ###############################################################
 # Internal consistency with Cronbach's alpha
-###############################################################
 
 # Calculate for Cronbach's alpha for full scale 1
 alpha(dfitems)
@@ -204,7 +203,7 @@ splitHalf(dfitems)
 ###############################################################
 
 # Calculate for Cronbach's alpha for full scale 1
-alpha(dfitems)
+psych::alpha(dfitems)
 # raw_alpha std.alpha G6(smc) average_r S/N   ase mean   sd median_r
 # 0.74      0.74    0.78      0.24 2.8 0.063  2.8 0.77     0.24
 # raw_alpha = 0.74 > .70 acceptable
@@ -262,7 +261,7 @@ splitHalf(dfitems[,item_fa1])
 
 
 item_fa2 <- c("support_hs", "feedback_ha", "taskhelp_ha", "workown_ha")
-alpha(dfitems[,item_fa2])
+psych::alpha(dfitems[,item_fa2])
 #  raw_alpha std.alpha G6(smc) average_r S/N   ase mean   sd median_r
 #       0.68      0.68    0.63      0.35 2.1 0.083  2.7 0.91     0.32
 # raw_alpha = 0.68 < .70 -> slightly below acceptable

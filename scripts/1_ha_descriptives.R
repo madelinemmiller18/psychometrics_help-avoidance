@@ -178,11 +178,12 @@ for (i in item_names) {
 
 
 # Plot histogram of total scores (here we expect a Gaussian)
-pdf(paste0(figures_path,"histogram_totalscores.pdf"), width = 7, height = 5)
+#pdf(paste0(figures_path,"histogram_totalscores.pdf"), width = 7, height = 5)
+png(paste0(figures_path, "histogram_totalscores.png"), width = 7, height = 5, units = "in", res = 300)
 # Find the actual minimum and maximum score for clean plotting
 min_score <- min(total_scores)
 max_score <- max(total_scores)
-total_scores
+mean(total_scores)
 hist(
   total_scores,
   main = "Total Scores",   # title
@@ -265,7 +266,8 @@ dev.off()
 #################################
 # We can look at the relationship between a covariant and the total scores
 # of scale 1
-pdf(paste0(figures_path,"scatter_covariate_language.pdf"), width = 7, height = 5)
+png(paste0(figures_path, "scatter_covariate_language.png"), width = 7, height = 5, units = "in", res = 300)
+#pdf(paste0(figures_path,"scatter_covariate_language.pdf"), width = 7, height = 5)
 scatter.smooth(
   x = df$langlevel,
   y = total_scores,
@@ -395,13 +397,16 @@ for(j in 1:length(item_names)){
   itemcor1[j] <- cor(dfitems[,item_names[j]],scale_no_j)
 }
 # plot the results
-pdf(paste0(figures_path,"item_scale_correlation_1.pdf"), width = 7, height = 5)
+#pdf(paste0(figures_path,"item_scale_correlation_1.pdf"), width = 7, height = 5)
+png(paste0(figures_path,"item_cor_all.png"), width = 7, height = 5,units = "in", res = 300)
 plot(itemcor1, axes=F, type="b", ylim=c(0,1),
      xlab="item", ylab="item scale correlation")
 axis(2) # add y-axis
 axis(1,1:9,c(1,2,3,4,5,6,7,8,9)) # add item labels on x-axis
 abline(h=c(.3),lty=2) # add horizontal line
+text(1:9, itemcor1 + 0.05, round(itemcor1, 2), cex=0.9) 
 dev.off()
+
 itemcor1
 # item scale correlations all very low,
 # not acceptable(below threshold of 0.3) are candidates for deletion
@@ -446,6 +451,24 @@ colnames(tab1) <- c("item difficulty","item variance", "item scale correlation")
 rownames(tab1) <- item_names
 # Print table with values rounded to two decimal places
 round(tab1,2)
+#save table png
+library(gridExtra)
+# Save all calculated item descriptive statistics in a data frame
+tab1 <- data.frame(itemdiff, itemvar, itemcor)
+# Add column names
+colnames(tab1) <- c("item difficulty","item variance", "item scale correlation")
+# Replace item names with numbers
+rownames(tab1) <- paste0("I", 1:nrow(tab1))  # or just 1:nrow(tab1) for plain numbers
+
+# Round to two decimal places
+tab1_rounded <- round(tab1, 2)
+# Print to console
+print(tab1_rounded)
+# Save as PNG
+png(paste0(figures_path, "item_descriptives.png"), 
+    width = 1200, height = 800, res = 150)
+grid.table(tab1_rounded)
+dev.off()
 
 # Print latex table
 xtable(tab1)
@@ -532,12 +555,13 @@ xtable(comparison)
 
 
 #################################
-# PLOT: ITEM-SCALE CORRELATIONS BY SUBSET
+# PLOT: ITEM-SCALE CORRELATIONS BY AI SUBSET
 #################################
 
 # Self-created items
 # main="Self-created items"
-pdf(paste0(figures_path,"item_cor_self.pdf"), width = 7, height = 5)
+png(paste0(figures_path,"item_cor_self.png"), width = 7, height = 5,units = "in", res = 300)
+#pdf(paste0(figures_path,"item_cor_self.pdf"), width = 7, height = 5)
 plot(itemcor_self, axes=F, type="b", ylim=c(0,1),
      xlab="item", ylab="item-subset correlation")
 axis(2)
@@ -548,8 +572,9 @@ dev.off()
 
 # LLM-generated items
 # main="LLM-generated items"
-pdf(paste0(figures_path,"item_cor_llm.pdf"), width = 7, height = 5)
-plot(itemcor_llm, axes=F, type="b", ylim=c(0,1),
+png(paste0(figures_path,"item_cor_llm.png"), width = 7, height = 5,units = "in", res = 300)
+#pdf(paste0(figures_path,"item_cor_llm.pdf"), width = 7, height = 5)
+plot(itemcor_llm, axes=F, type="b", ylim=c(0,1), width = 7, height = 5,
      xlab="item", ylab="item subset correlation")
 axis(2)
 axis(1, at=1:4, labels=6:9)
@@ -557,4 +582,63 @@ abline(h=0.3, lty=2)
 text(1:4, itemcor_llm + 0.05, round(itemcor_llm, 2), cex=0.9)
 dev.off()
 
+#################################
+# PLOT: General versus Task SUBSET
+#################################
+general <- c("explain_hs", "quiet_ha", "participation_ha", "pretunderstand_ha", "clarification_ha")
+task <- c("support_hs","feedback_ha","taskhelp_ha","workown_ha")
+item_type_gt <- c(rep("General", 5), rep("Task", 4))
 
+#################################
+# Calculate item-scale correlations
+#################################
+itemcor_gen <- c()
+for(j in 1:length(general)){
+  scale_no_j <- apply(dfitems[, general[-j]], 1, mean)
+  itemcor_gen[j] <- cor(dfitems[, general[j]], scale_no_j)
+}
+
+itemcor_task <- c()
+for(j in 1:length(task)){
+  scale_no_j <- apply(dfitems[, task[-j]], 1, mean)
+  itemcor_task[j] <- cor(dfitems[, task[j]], scale_no_j)
+}
+
+# Combine
+itemcor_subset_gt <- c(itemcor_gen, itemcor_task)
+
+#################################
+# Calculate total scores - FIX: don't use [-j] here
+#################################
+total_scores_gen <- apply(dfitems[, general], 1, sum)   # REMOVED [-j]
+total_scores_task <- apply(dfitems[, task], 1, sum)     # REMOVED [-j]
+
+#pdf(paste0(figures_path,"histogram_totalscores.pdf"), width = 7, height = 5)
+#png(paste0(figures_path, "histogram_totalscores.png"), width = 7, height = 5, units = "in", res = 300)
+# Find the actual minimum and maximum score for clean plotting
+min_score_g <- min(total_scores_gen)
+max_score_gen <- max(total_scores_gen)
+total_scores_gen
+hist(
+  total_scores_gen,
+  main = "Total Scores General",   # title
+  xlab = "Response",                          # x-axis label
+  ylab = "Frequency",                         # y-axis label
+  col = "lightblue",                        # bar color
+  border = "white",                         # remove dark borders
+  breaks = 5
+)
+#dev.off()
+
+min_score_t <- min(total_scores_task)
+max_score_t <- max(total_scores_task)
+total_scores_task
+hist(
+  total_scores_task,
+  main = "Total Scores Owned",   # title
+  xlab = "Response",                          # x-axis label
+  ylab = "Frequency",                         # y-axis label
+  col = "lightblue",                        # bar color
+  border = "white",                         # remove dark borders
+  breaks = 4
+)
