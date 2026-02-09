@@ -18,10 +18,10 @@
 
 #set working directory
 print(getwd())
-path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
-figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/reliability/"
-#path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
-#figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\reliability\\"
+# path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
+# figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/reliability/"
+path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
+figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\reliability\\"
 setwd(path)
 
 
@@ -34,7 +34,7 @@ library(dplyr)
 # set up data
 ###############################################################
 # upload data
-rawdata <- read.csv("data/Help Avoidance in Group Projects.csv")
+rawdata <- read.csv("Help Avoidance in Group Projects.csv")
 df <- rawdata[c(3:14)]
 
 # change column names
@@ -117,6 +117,7 @@ dfitems[,"support_hs"] <- 7-dfitems[,"support_hs"]
 
 ###############################################################
 # Internal consistency with Cronbach's alpha
+###############################################################
 
 # Calculate for Cronbach's alpha for full scale 1
 alpha(dfitems)
@@ -178,6 +179,16 @@ omegaFromSem(cfa2)
 # Omega Total  =  0.89 > .70, acceptable
 # -> higher than Cronbach's alpha 0.74, higher than 1-factor CFA omega (0.82)
 
+# === 5. CFA-based omega (2-factor model from EFA & reduced FA1: participation_ha removed) ===
+model3 <- '
+pa1 =~ explain_hs + quiet_ha + pretunderstand_ha + clarification_ha
+pa2 =~ support_hs + feedback_ha + taskhelp_ha + workown_ha
+'
+cfa3 <- cfa(model3,dfitems,std.lv=T)
+omegaFromSem(cfa3)
+# Omega Total  =  0.90 > .70, acceptable
+
+
 ###############################################################
 # Split half reliability
 ###############################################################
@@ -203,7 +214,7 @@ splitHalf(dfitems)
 ###############################################################
 
 # Calculate for Cronbach's alpha for full scale 1
-psych::alpha(dfitems)
+alpha(dfitems)
 # raw_alpha std.alpha G6(smc) average_r S/N   ase mean   sd median_r
 # 0.74      0.74    0.78      0.24 2.8 0.063  2.8 0.77     0.24
 # raw_alpha = 0.74 > .70 acceptable
@@ -227,14 +238,14 @@ splitHalf(dfitems)
 
 
 ###############################################################
-# 2.  Reliability by 2 Factors as suggested by Factor Analysis 
+# 2.  Reliability by 2 Factors as suggested by Factor Analysis
 ###############################################################
-# Compute Cronbach’s Alpha, McDonald’s Omega, and split-half reliability 
+# Compute Cronbach’s Alpha, McDonald’s Omega, and split-half reliability
 # for each factor with at least 3 items
 # FA1: 1,2,5,7,8
 # FA2: 3,4,6,9
 item_fa1 <- c("explain_hs", "quiet_ha", "participation_ha", "pretunderstand_ha", "clarification_ha")
-psych::alpha(dfitems[,item_fa1])
+alpha(dfitems[,item_fa1])
 # raw_alpha std.alpha G6(smc) average_r S/N   ase mean   sd median_r
 #       0.74      0.73    0.71      0.35 2.7 0.064  2.8 0.98     0.37
 # raw_alpha = 0.74 > .70 acceptable， same as full scale
@@ -261,7 +272,7 @@ splitHalf(dfitems[,item_fa1])
 
 
 item_fa2 <- c("support_hs", "feedback_ha", "taskhelp_ha", "workown_ha")
-psych::alpha(dfitems[,item_fa2])
+alpha(dfitems[,item_fa2])
 #  raw_alpha std.alpha G6(smc) average_r S/N   ase mean   sd median_r
 #       0.68      0.68    0.63      0.35 2.1 0.083  2.7 0.91     0.32
 # raw_alpha = 0.68 < .70 -> slightly below acceptable
@@ -283,14 +294,14 @@ splitHalf(dfitems[,item_fa2])
 # Maximum split half reliability (lambda 4) =  0.7
 # Average split half reliability            =  0.68
 # Minimum split half reliability  (beta)    =  0.67
-# -> more stable than that of FA1 
-# -> internal consistency?? 
+# -> more stable than that of FA1
+# -> internal consistency??
 
 
 ###############################################################
-# 3.  Reliability by Self-created vs LLM-generated 
+# 3.  Reliability by Self-created vs LLM-generated
 ###############################################################
-# Compute Cronbach’s Alpha, McDonald’s Omega, and split-half reliability 
+# Compute Cronbach’s Alpha, McDonald’s Omega, and split-half reliability
 # for self-created (1-5) and LLM-generated (6-9) subscales.
 self_created <- c("explain_hs", "quiet_ha", "support_hs", "feedback_ha", "participation_ha")
 alpha(dfitems[,self_created])
@@ -305,7 +316,7 @@ alpha(dfitems[,self_created])
 # support_hs            0.58      0.57    0.54      0.25 1.35     0.11 0.0222
 # feedback_ha           0.55      0.53    0.51      0.22 1.15     0.11 0.0234
 # participation_ha      0.60      0.59    0.56      0.27 1.45     0.10 0.0194
-# -> dropping item 5 doesn't change Cronbach's alpha 
+# -> dropping item 5 doesn't change Cronbach's alpha
 # -> no item dropping improves Cronbach's alpha
 
 omegah(dfitems[,self_created], nfactors = 1)
@@ -341,5 +352,35 @@ splitHalf(dfitems[,llm_generated])
 # Minimum split half reliability  (beta)    =  0.26 -> instability
 
 # The two-factor model suggested by EFA/CFA appears to provide better reliability.
-# Because FA1 (indicated by alpha?) has high internal consistency 
-# and FA2 (indicated by splitHalf...) is relatively more stable compared with other. 
+# Because FA1 (indicated by alpha?) has high internal consistency
+# and FA2 (indicated by splitHalf...) is relatively more stable compared with other.
+
+###############################################################
+# 4.  Reliability by 2 Factors (reduced FA1: participation_ha removed)
+###############################################################
+# Reduced FA1 (remove participation_ha)
+item_fa1_re <- c("explain_hs", "quiet_ha",
+                 "pretunderstand_ha", "clarification_ha")
+
+# FA1_re reliability
+alpha(dfitems[, item_fa1_re])
+# raw_alpha std.alpha G6(smc) average_r S/N   ase mean  sd median_r
+# 0.75      0.75     0.7      0.43   3 0.065    3 1.1     0.42
+# raw_alpha = 0.75 > .70 acceptable，increase 0.1 compared with the one including item5
+
+# Alpha if item droppeds
+# Alpha decrease to 0.65, when item 2 (quite_ha) is dropped
+#                   raw_alpha std.alpha G6(smc) average_r S/N alpha se  var.r med.r
+# explain_hs             0.70      0.70    0.61      0.44 2.3    0.082 0.0013  0.42
+# quiet_ha               0.65      0.65    0.55      0.38 1.8    0.096 0.0017  0.39
+# pretunderstand_ha      0.71      0.71    0.63      0.45 2.4    0.080 0.0102  0.48
+# clarification_ha       0.71      0.71    0.62      0.45 2.4    0.081 0.0050  0.42
+
+omegah(dfitems[, item_fa1_re], nfactors = 1)
+# Omega Total = 0.75, increase 0.01 compared with original fa1
+
+splitHalf(dfitems[, item_fa1_re])
+# Maximum split half reliability (lambda 4) =  0.79, increased 0.02
+# Average split half reliability            =  0.75, increased 0.05
+# Minimum split half reliability  (beta)    =  0.71, increased 0.1
+

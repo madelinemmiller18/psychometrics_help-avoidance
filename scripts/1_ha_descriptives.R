@@ -21,10 +21,10 @@
 ###############################################################
 
 print(getwd())
-path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
-figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/descriptives/"
-#path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
-#figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\descriptives\\"
+# path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
+# figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/descriptives/"
+path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
+figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\descriptives\\"
 setwd(path)
 
 #Install libraries
@@ -34,7 +34,7 @@ library(lubridate) # handling and manipulation of date and time data
 library(dplyr)
 
 #upload data
-rawdata <- read.csv("data/Help Avoidance in Group Projects.csv")
+rawdata <- read.csv("Help Avoidance in Group Projects.csv")
 rawdata$id <- 1:nrow(rawdata) #Add ID column
 
 dim(rawdata) # dimension
@@ -178,12 +178,11 @@ for (i in item_names) {
 
 
 # Plot histogram of total scores (here we expect a Gaussian)
-#pdf(paste0(figures_path,"histogram_totalscores.pdf"), width = 7, height = 5)
-png(paste0(figures_path, "histogram_totalscores.png"), width = 7, height = 5, units = "in", res = 300)
+pdf(paste0(figures_path,"histogram_totalscores.pdf"), width = 7, height = 5)
 # Find the actual minimum and maximum score for clean plotting
 min_score <- min(total_scores)
 max_score <- max(total_scores)
-mean(total_scores)
+total_scores
 hist(
   total_scores,
   main = "Total Scores",   # title
@@ -266,8 +265,7 @@ dev.off()
 #################################
 # We can look at the relationship between a covariant and the total scores
 # of scale 1
-png(paste0(figures_path, "scatter_covariate_language.png"), width = 7, height = 5, units = "in", res = 300)
-#pdf(paste0(figures_path,"scatter_covariate_language.pdf"), width = 7, height = 5)
+pdf(paste0(figures_path,"scatter_covariate_language.pdf"), width = 7, height = 5)
 scatter.smooth(
   x = df$langlevel,
   y = total_scores,
@@ -397,16 +395,13 @@ for(j in 1:length(item_names)){
   itemcor1[j] <- cor(dfitems[,item_names[j]],scale_no_j)
 }
 # plot the results
-#pdf(paste0(figures_path,"item_scale_correlation_1.pdf"), width = 7, height = 5)
-png(paste0(figures_path,"item_cor_all.png"), width = 7, height = 5,units = "in", res = 300)
+pdf(paste0(figures_path,"item_scale_correlation_1.pdf"), width = 7, height = 5)
 plot(itemcor1, axes=F, type="b", ylim=c(0,1),
      xlab="item", ylab="item scale correlation")
 axis(2) # add y-axis
 axis(1,1:9,c(1,2,3,4,5,6,7,8,9)) # add item labels on x-axis
 abline(h=c(.3),lty=2) # add horizontal line
-text(1:9, itemcor1 + 0.05, round(itemcor1, 2), cex=0.9) 
 dev.off()
-
 itemcor1
 # item scale correlations all very low,
 # not acceptable(below threshold of 0.3) are candidates for deletion
@@ -451,24 +446,6 @@ colnames(tab1) <- c("item difficulty","item variance", "item scale correlation")
 rownames(tab1) <- item_names
 # Print table with values rounded to two decimal places
 round(tab1,2)
-#save table png
-library(gridExtra)
-# Save all calculated item descriptive statistics in a data frame
-tab1 <- data.frame(itemdiff, itemvar, itemcor)
-# Add column names
-colnames(tab1) <- c("item difficulty","item variance", "item scale correlation")
-# Replace item names with numbers
-rownames(tab1) <- paste0("I", 1:nrow(tab1))  # or just 1:nrow(tab1) for plain numbers
-
-# Round to two decimal places
-tab1_rounded <- round(tab1, 2)
-# Print to console
-print(tab1_rounded)
-# Save as PNG
-png(paste0(figures_path, "item_descriptives.png"), 
-    width = 1200, height = 800, res = 150)
-grid.table(tab1_rounded)
-dev.off()
 
 # Print latex table
 xtable(tab1)
@@ -555,13 +532,12 @@ xtable(comparison)
 
 
 #################################
-# PLOT: ITEM-SCALE CORRELATIONS BY AI SUBSET
+# PLOT: ITEM-SCALE CORRELATIONS BY SUBSET
 #################################
 
 # Self-created items
 # main="Self-created items"
-png(paste0(figures_path,"item_cor_self.png"), width = 7, height = 5,units = "in", res = 300)
-#pdf(paste0(figures_path,"item_cor_self.pdf"), width = 7, height = 5)
+pdf(paste0(figures_path,"item_cor_self.pdf"), width = 7, height = 5)
 plot(itemcor_self, axes=F, type="b", ylim=c(0,1),
      xlab="item", ylab="item-subset correlation")
 axis(2)
@@ -572,8 +548,7 @@ dev.off()
 
 # LLM-generated items
 # main="LLM-generated items"
-png(paste0(figures_path,"item_cor_llm.png"), width = 5, height = 5,units = "in", res = 300)
-#pdf(paste0(figures_path,"item_cor_llm.pdf"), width = 7, height = 5)
+pdf(paste0(figures_path,"item_cor_llm.pdf"), width = 7, height = 5)
 plot(itemcor_llm, axes=F, type="b", ylim=c(0,1),
      xlab="item", ylab="item subset correlation")
 axis(2)
@@ -582,63 +557,92 @@ abline(h=0.3, lty=2)
 text(1:4, itemcor_llm + 0.05, round(itemcor_llm, 2), cex=0.9)
 dev.off()
 
-#################################
-# PLOT: General versus Task SUBSET
-#################################
-general <- c("explain_hs", "quiet_ha", "participation_ha", "pretunderstand_ha", "clarification_ha")
-task <- c("support_hs","feedback_ha","taskhelp_ha","workown_ha")
-item_type_gt <- c(rep("General", 5), rep("Task", 4))
 
 #################################
-# Calculate item-scale correlations
+# Histograms for PA1 and PA2 subscales
 #################################
-itemcor_gen <- c()
-for(j in 1:length(general)){
-  scale_no_j <- apply(dfitems[, general[-j]], 1, mean)
-  itemcor_gen[j] <- cor(dfitems[, general[j]], scale_no_j)
-}
 
-itemcor_task <- c()
-for(j in 1:length(task)){
-  scale_no_j <- apply(dfitems[, task[-j]], 1, mean)
-  itemcor_task[j] <- cor(dfitems[, task[j]], scale_no_j)
-}
+# Define items for each subscale
+pa1_items <- c("explain_hs", "quiet_ha", "participation_ha",
+               "pretunderstand_ha", "clarification_ha")
+pa2_items <- c("support_hs", "feedback_ha", "taskhelp_ha", "workown_ha")
 
-# Combine
-itemcor_subset_gt <- c(itemcor_gen, itemcor_task)
+# Calculate total scores for each subscale
+total_scores_pa1 <- apply(dfitems[, pa1_items], 1, sum)
+total_scores_pa2 <- apply(dfitems[, pa2_items], 1, sum)
 
-#################################
-# Calculate total scores - FIX: don't use [-j] here
-#################################
-total_scores_gen <- apply(dfitems[, general], 1, sum)   # REMOVED [-j]
-total_scores_task <- apply(dfitems[, task], 1, sum)     # REMOVED [-j]
+# Plot histograms side by side (1x2 layout)
+pdf(paste0(figures_path, "histogram_totalscores_subscales.pdf"), width = 14, height = 5)
+par(mfrow = c(1, 2))
 
-#pdf(paste0(figures_path,"histogram_totalscores.pdf"), width = 7, height = 5)
-#png(paste0(figures_path, "histogram_totalscores.png"), width = 7, height = 5, units = "in", res = 300)
-# Find the actual minimum and maximum score for clean plotting
-min_score_g <- min(total_scores_gen)
-max_score_gen <- max(total_scores_gen)
-total_scores_gen
+# PA1 histogram
 hist(
-  total_scores_gen,
-  main = "Total Scores General",   # title
-  xlab = "Response",                          # x-axis label
-  ylab = "Frequency",                         # y-axis label
-  col = "lightblue",                        # bar color
-  border = "white",                         # remove dark borders
-  breaks = 5
+  total_scores_pa1,
+  main = "PA1 Total Scores",
+  xlab = "Response",
+  ylab = "Frequency",
+  col = "lightblue",
+  border = "white",
+  breaks = 10
 )
-#dev.off()
 
-min_score_t <- min(total_scores_task)
-max_score_t <- max(total_scores_task)
-total_scores_task
+# PA2 histogram
 hist(
-  total_scores_task,
-  main = "Total Scores Owned",   # title
-  xlab = "Response",                          # x-axis label
-  ylab = "Frequency",                         # y-axis label
-  col = "lightblue",                        # bar color
-  border = "white",                         # remove dark borders
-  breaks = 4
+  total_scores_pa2,
+  main = "PA2 Total Scores",
+  xlab = "Response",
+  ylab = "Frequency",
+  col = "lightblue",
+  border = "white",
+  breaks = 10
 )
+
+par(mfrow = c(1, 1))
+dev.off()
+
+
+
+#################################
+# Standardized density plot (mean per item)
+#################################
+pdf(paste0(figures_path, "density_meanscores_subscales.pdf"), width = 7, height = 5)
+
+# Calculate mean scores (average per item, now on same 1-6 scale)
+mean_scores_pa1 <- total_scores_pa1 / 5  # 5 items in PA1
+mean_scores_pa2 <- total_scores_pa2 / 4  # 4 items in PA2
+
+# Calculate densities
+d_pa1_mean <- density(mean_scores_pa1)
+d_pa2_mean <- density(mean_scores_pa2)
+
+# Plot
+plot(
+  d_pa1_mean,
+  main = "Mean Item Scores Distribution",
+  xlab = "Mean Score (1-6 scale)",
+  ylab = "Density",
+  lwd = 2,
+  col = "steelblue",
+  xlim = c(1, 6),
+  ylim = c(0, max(c(d_pa1_mean$y, d_pa2_mean$y)) * 1.1)  # Add 10% padding at top
+)
+
+lines(d_pa2_mean, lwd = 2, col = "coral")
+
+# Add shaded areas
+polygon(d_pa1_mean, col = adjustcolor("steelblue", alpha.f = 0.3), border = NA)
+polygon(d_pa2_mean, col = adjustcolor("coral", alpha.f = 0.3), border = NA)
+
+# Add legend
+legend(
+  "topright",
+  legend = c(
+    paste0("PA1 (M=", round(mean(mean_scores_pa1), 2), ", SD=", round(sd(mean_scores_pa1), 2), ")"),
+    paste0("PA2 (M=", round(mean(mean_scores_pa2), 2), ", SD=", round(sd(mean_scores_pa2), 2), ")")
+  ),
+  col = c("steelblue", "coral"),
+  lwd = 2,
+  bty = "n"
+)
+
+dev.off()
