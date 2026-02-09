@@ -234,7 +234,7 @@ splitHalf(dfitems)
 # FA1: 1,2,5,7,8
 # FA2: 3,4,6,9
 item_fa1 <- c("explain_hs", "quiet_ha", "participation_ha", "pretunderstand_ha", "clarification_ha")
-alpha(dfitems[,item_fa1])
+psych::alpha(dfitems[,item_fa1])
 # raw_alpha std.alpha G6(smc) average_r S/N   ase mean   sd median_r
 #       0.74      0.73    0.71      0.35 2.7 0.064  2.8 0.98     0.37
 # raw_alpha = 0.74 > .70 acceptable， same as full scale

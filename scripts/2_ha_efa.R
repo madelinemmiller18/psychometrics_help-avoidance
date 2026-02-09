@@ -128,8 +128,8 @@ dfitems[,"support_hs"] <- 7-dfitems[,"support_hs"]
 #################################
 
 # Plot the scree plot
-#pdf(paste0(figures_path,"scree_plot.pdf"), width = 7, height = 5)
-png(paste0(figures_path, "scree_plot.png"), width = 7, height = 5, units = "in", res = 300)
+pdf(paste0(figures_path,"scree_plot.pdf"), width = 7, height = 5)
+#png(paste0(figures_path, "scree_plot.png"), width = 7, height = 5, units = "in", res = 300)
 fa1 <- fa.parallel(dfitems, # data frame of just our items
                    fm="ml", # estimation method maximum likelihood
                    # (allows for hypothesis testing, is based on
@@ -505,6 +505,7 @@ print(t2ort1)
 # 6. I avoid asking my group members for help even when I find my task difficult. [+] efaP2 *my task
 # 9. I tend to keep working on my own even when collaborating with my group would make the task easier [+] efaP2  *on my own... the task (I am working on)
 # Test bifactor solutions:
+
 # Initialize two more target matrices
 PA1 <- PA2 <- matrix(0,dim(initial_loadings)[1],dim(initial_loadings)[2])
 # The first target PA1 allows factor 1 to load on all items, while factor 2 is
@@ -559,6 +560,7 @@ print(fa.3varimax)
 # Perform 3-factor with oblimin rotation
 fa.3oblimin <- fa(dfitems, nfactors=3, rotate="oblimin", fm="pa", max.iter=1000)
 print(fa.3oblimin)
+fa.3oblimin$Vaccounted
 #                    PA1   PA2   PA3   h2   u2 com
 # explain_hs         0.34  0.34  0.23 0.38 0.62 2.7
 # quiet_ha           0.59  0.31 -0.07 0.52 0.48 1.6
@@ -628,3 +630,26 @@ print(xtable(factor_cor_table,
 pdf(paste0(figures_path,"efa_oblimin_axes.pdf"), width = 7, height = 5)
 pl.fa2(obli, "Two-Factor Solution (Oblimin Rotation)", fa2=fa.start)
 dev.off()
+
+#################################
+# Proportion Variance
+#################################
+#use proportion var from fa function, or square factor loadings of each factor to get variance
+
+# Get variance accounted for
+fa1 <- fa(dfitems, nfactors=1, rotate="none", fm="pa")
+summary(fa1)
+fa1$Vaccounted
+total_var1 <- fa1$Vaccounted["Cumulative Var", "PA1"]
+print(paste("Total variance explained:", round(total_var1 * 100, 2), "%"))
+
+
+fa2.oblimin <- fa(dfitems, nfactors=2, rotate="oblimin", fm="pa")
+
+fa2.oblimin$Vaccounted
+fa2.oblimin$communality
+
+
+# Total variance explained by the model
+total_var <- fa2.oblimin$Vaccounted["Cumulative Var", "PA2"]
+print(paste("Total variance explained:", round(total_var * 100, 2), "%"))

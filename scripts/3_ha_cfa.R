@@ -525,3 +525,24 @@ p <- ggplot(fit_long, aes(x = Model, y = Value, fill = Acceptable)) +
 
 ggsave(paste0(figures_path, "cfa_fit_comparison.png"),
        p, width = 12, height = 6, dpi = 300)
+
+# test bifactor solution
+bifactor_model <- 
+'
+General =~ explain_hs + quiet_ha + participation_ha + pretunderstand_ha + 
+            clarification_ha + support_hs + feedback_ha + taskhelp_ha + workown_ha
+OwnTask =~ support_hs + feedback_ha + taskhelp_ha + workown_ha
+
+# Orthogonality constraints
+General ~~ 0*OwnTask
+'
+
+bifactor_cfa <- cfa(
+  bifactor_model,
+  data = df,
+  std.lv = TRUE,
+  estimator = "MLR"   # robust recommended
+)
+
+summary(bifactor_cfa,standardized=T,fit=T)
+fitMeasures(bifactor_cfa, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))

@@ -572,9 +572,9 @@ dev.off()
 
 # LLM-generated items
 # main="LLM-generated items"
-png(paste0(figures_path,"item_cor_llm.png"), width = 7, height = 5,units = "in", res = 300)
+png(paste0(figures_path,"item_cor_llm.png"), width = 5, height = 5,units = "in", res = 300)
 #pdf(paste0(figures_path,"item_cor_llm.pdf"), width = 7, height = 5)
-plot(itemcor_llm, axes=F, type="b", ylim=c(0,1), width = 7, height = 5,
+plot(itemcor_llm, axes=F, type="b", ylim=c(0,1),
      xlab="item", ylab="item subset correlation")
 axis(2)
 axis(1, at=1:4, labels=6:9)
