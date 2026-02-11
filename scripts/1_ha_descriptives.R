@@ -21,10 +21,10 @@
 ###############################################################
 
 print(getwd())
-# path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
-# figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/descriptives/"
-path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
-figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\descriptives\\"
+ path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
+ figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/descriptives/"
+#path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
+#figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\descriptives\\"
 setwd(path)
 
 #Install libraries
@@ -34,7 +34,7 @@ library(lubridate) # handling and manipulation of date and time data
 library(dplyr)
 
 #upload data
-rawdata <- read.csv("Help Avoidance in Group Projects.csv")
+rawdata <- read.csv("data/Help Avoidance in Group Projects.csv")
 rawdata$id <- 1:nrow(rawdata) #Add ID column
 
 dim(rawdata) # dimension
@@ -431,6 +431,47 @@ abline(h=c(.3),lty=2) # add horizontal line
 dev.off()
 
 # After removing item 3, all value is acceptable (above 0.3)
+
+#test correlation among Factor 1 and 2 items
+
+#Factor 1: 1, 2, 5, 7, 8
+gen_Items <- item_names[c(1,2,5,7,8)] 
+task_Items <- item_names[c(3,4,6,9)] 
+genItems <- c() # empty list
+taskItems <- c() # empty list
+# loop  through the items
+for(j in 1:length(gen_Items)){
+  # Save the sub scale including all items, but item j
+  scale_no_j <- apply(dfitems[,gen_Items[-j]],1,mean)
+  # Calculate the correlation with item j
+  genItems[j] <- cor(dfitems[,gen_Items[j]],scale_no_j,use="pair")
+}
+genItems # print the correlations
+# 0.5435445 0.5421667 0.3516961 0.3421549 0.4474109 0.4090479 0.4863468 0.3148630
+
+for(j in 1:length(task_Items)){
+  # Save the sub scale including all items, but item j
+  scale_no_j <- apply(dfitems[,task_Items[-j]],1,mean)
+  # Calculate the correlation with item j
+  taskItems[j] <- cor(dfitems[,task_Items[j]],scale_no_j,use="pair")
+}
+taskItems # print the correlations
+
+pdf(paste0(figures_path,"item_scale_correlation_genItems.pdf"), width = 7, height = 5)
+plot(genItems, axes=F, type="b", ylim=c(0,1),
+     xlab="item", ylab="item scale correlation")
+axis(2) # add y-axis
+axis(1,1:5,c(1,2,5,7,8)) # add item labels on x-axis
+abline(h=c(.3),lty=2) # add horizontal line
+dev.off()
+
+pdf(paste0(figures_path,"item_scale_correlation_taskItems.pdf"), width = 7, height = 5)
+plot(taskItems, axes=F, type="b", ylim=c(0,1),
+     xlab="item", ylab="item scale correlation")
+axis(2) # add y-axis
+axis(1,1:4,c(3,4,6,9)) # add item labels on x-axis
+abline(h=c(.3),lty=2) # add horizontal line
+dev.off()
 
 #################################
 # Table with all results
