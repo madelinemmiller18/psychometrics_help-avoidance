@@ -439,26 +439,53 @@ cfa_llm <- cfa(model_llm, dfitems_llm, std.lv = TRUE)
 summary(cfa_llm, standardized = T, fit = T)
 # very poor fit 
 
-#fitmeasures -----------------
-fitMeasures(cfa2, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
+##########################################################################
+# Bifactor solution
+##########################################################################
+
+# test bifactor solution
+bifactor_model <- 
+  '
+General =~ explain_hs + quiet_ha + participation_ha + pretunderstand_ha + 
+            clarification_ha + support_hs + feedback_ha + taskhelp_ha + workown_ha
+OwnTask =~ support_hs + feedback_ha + taskhelp_ha + workown_ha
+
+# Orthogonality constraints
+General ~~ 0*OwnTask
+'
+
+bifactorcfa <- cfa(
+  bifactor_model,
+  data = df,
+  std.lv = TRUE,
+  estimator = "MLR"   # robust recommended
+)
+
+summary(bifactorcfa,standardized=T,fit=T)
+fitMeasures(bifactorcfa, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
+
+##########################################################################
+# Plot compare values
+##########################################################################
+
 # Extract fit measures
 fit_cfa2 <- fitMeasures(cfa2, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
 fit_cfa2_mod <- fitMeasures(cfa2_mod, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
 fit_cfa3 <- fitMeasures(cfa3, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
 fit_cfa1 <- fitMeasures(cfa1, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
-fit_cfa_pn <- fitMeasures(cfa_pn, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
-fit_cfa_ai <- fitMeasures(cfa_ai, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
+bifactor_cfa <- fitMeasures(bifactorcfa, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
+#fit_cfa_ai <- fitMeasures(cfa_ai, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
 
 # Combine into data frame
 fit_table <- data.frame(
-  Model = c("GenOwn_2f", "GenOwn_Mod","GenOwn_Unc","One Factor", "Pos/Neg Coding 2f", "AI vs Human 2f"),
-  ChiSq = c(fit_cfa2["chisq"], fit_cfa2_mod["chisq"], fit_cfa3["chisq"], fit_cfa1["chisq"], fit_cfa_pn["chisq"], fit_cfa_ai["chisq"]),
-  df = c(fit_cfa2["df"], fit_cfa2_mod["df"], fit_cfa3["df"], fit_cfa1["df"], fit_cfa_pn["df"], fit_cfa_ai["df"]),
-  pvalue = c(fit_cfa2["pvalue"], fit_cfa2_mod["pvalue"], fit_cfa3["pvalue"], fit_cfa1["pvalue"], fit_cfa_pn["pvalue"], fit_cfa_ai["pvalue"]),
-  RMSEA = c(fit_cfa2["rmsea"], fit_cfa2_mod["rmsea"], fit_cfa3["rmsea"], fit_cfa1["rmsea"], fit_cfa_pn["rmsea"], fit_cfa_ai["rmsea"]),
-  SRMR = c(fit_cfa2["srmr"], fit_cfa2_mod["srmr"], fit_cfa3["srmr"], fit_cfa1["srmr"], fit_cfa_pn["srmr"], fit_cfa_ai["srmr"]),
-  CFI = c(fit_cfa2["cfi"], fit_cfa2_mod["cfi"], fit_cfa3["cfi"], fit_cfa1["cfi"], fit_cfa_pn["cfi"], fit_cfa_ai["cfi"]),
-  TLI = c(fit_cfa2["tli"], fit_cfa2_mod["tli"], fit_cfa3["tli"], fit_cfa1["tli"], fit_cfa_pn["tli"], fit_cfa_ai["tli"])
+  Model = c("GenOwn", "ModInd","Uncorrrelated","OneFactor", "Bifactor"),
+  ChiSq = c(fit_cfa2["chisq"], fit_cfa2_mod["chisq"], fit_cfa3["chisq"], fit_cfa1["chisq"], bifactor_cfa["chisq"]),
+  df = c(fit_cfa2["df"], fit_cfa2_mod["df"], fit_cfa3["df"], fit_cfa1["df"], bifactor_cfa["df"]),
+  pvalue = c(fit_cfa2["pvalue"], fit_cfa2_mod["pvalue"], fit_cfa3["pvalue"], fit_cfa1["pvalue"], bifactor_cfa["pvalue"]),
+  RMSEA = c(fit_cfa2["rmsea"], fit_cfa2_mod["rmsea"], fit_cfa3["rmsea"], fit_cfa1["rmsea"], bifactor_cfa["rmsea"]),
+  SRMR = c(fit_cfa2["srmr"], fit_cfa2_mod["srmr"], fit_cfa3["srmr"], fit_cfa1["srmr"], bifactor_cfa["srmr"]),
+  CFI = c(fit_cfa2["cfi"], fit_cfa2_mod["cfi"], fit_cfa3["cfi"], fit_cfa1["cfi"], bifactor_cfa["cfi"]),
+  TLI = c(fit_cfa2["tli"], fit_cfa2_mod["tli"], fit_cfa3["tli"], fit_cfa1["tli"], bifactor_cfa["tli"])
 )
 
 # Round for display
@@ -503,9 +530,10 @@ p <- ggplot(fit_long, aes(x = Model, y = Value, fill = Acceptable)) +
   geom_hline(data = thresholds, aes(yintercept = Threshold), 
              linetype = "dashed", color = "red", linewidth = 0.8, alpha = 0.4) +
   geom_text(data = thresholds, 
-            aes(x = 0.4, y = Threshold, label = Label),
-            hjust = 0, vjust = -0.5, size = 2.5, fontface = "bold", 
+            aes(x = -Inf, y = Threshold, label = Label),
+            hjust = 1.1, vjust = 1.5, size = 2.5, fontface = "bold", 
             inherit.aes = FALSE) +
+  coord_cartesian(clip = "off") + 
   geom_text(aes(label = sprintf("%.2f", Value)), 
             vjust = -0.5, size = 3.5, fontface = "bold") +
   facet_wrap(~Index, scales = "free_y", nrow = 1) +
@@ -524,25 +552,5 @@ p <- ggplot(fit_long, aes(x = Model, y = Value, fill = Acceptable)) +
   )
 
 ggsave(paste0(figures_path, "cfa_fit_comparison.png"),
-       p, width = 12, height = 6, dpi = 300)
+       p, width = 12, height = 7, dpi = 300)
 
-# test bifactor solution
-bifactor_model <- 
-'
-General =~ explain_hs + quiet_ha + participation_ha + pretunderstand_ha + 
-            clarification_ha + support_hs + feedback_ha + taskhelp_ha + workown_ha
-OwnTask =~ support_hs + feedback_ha + taskhelp_ha + workown_ha
-
-# Orthogonality constraints
-General ~~ 0*OwnTask
-'
-
-bifactor_cfa <- cfa(
-  bifactor_model,
-  data = df,
-  std.lv = TRUE,
-  estimator = "MLR"   # robust recommended
-)
-
-summary(bifactor_cfa,standardized=T,fit=T)
-fitMeasures(bifactor_cfa, c("chisq","df","pvalue","rmsea","srmr","cfi","tli"))
