@@ -488,9 +488,9 @@ print(t2ort1)
 
 # Loadings:
 #                     PA1     PA2
-# explain_hs        0.620 -0.0962
+# explain_hs        0.620 -0.0962 
 # quiet_ha          0.669 -0.2448
-# support_hs        0.311  0.3762
+# support_hs        0.311  0.3762 #cross loading
 # feedback_ha       0.446  0.3628
 # participation_ha  0.394 -0.0590
 # taskhelp_ha       0.588  0.5265
@@ -506,28 +506,41 @@ print(t2ort1)
 # 9. I tend to keep working on my own even when collaborating with my group would make the task easier [+] efaP2  *on my own... the task (I am working on)
 # Test bifactor solutions:
 
-# Initialize two more target matrices
+# TARGET general with subset task
 PA1 <- PA2 <- matrix(0,dim(initial_loadings)[1],dim(initial_loadings)[2])
 # The first target PA1 allows factor 1 to load on all items, while factor 2 is
 # restricted to load only on 2,4-9
-PA1[1:9,1] <- PA2[c(3,4,6,9), 2] <- NA
-# Perform orthogonal rotation with target L31
-t2ort2 <- targetT(A=initial_loadings, Target=PA1)
+#PA1[1:9,1] <- PA2[c(3,4,6,9), 2] <- NA
+
+# Single target matrix combining both factor intentions
+Target <- matrix(0, dim(initial_loadings)[1], dim(initial_loadings)[2])
+
+# General factor loads on all items
+Target[, 1] <- NA
+
+# Specific factor loads only on selected items
+Target[c(3,4,6,9), 2] <- NA
+
+t2ort2 <- targetT(A=initial_loadings, Target=Target)
 
 print(t2ort2)
 
 summary(t2ort2)
-# Loadings:
-#                     PA1     PA2
-# explain_hs        0.620 -0.0962
-# quiet_ha          0.669 -0.2448
-# support_hs        0.311  0.3762
-# feedback_ha       0.446  0.3628
-# participation_ha  0.394 -0.0590
-# taskhelp_ha       0.588  0.5265
-# pretunderstand_ha 0.504 -0.4925
-# clarification_ha  0.576 -0.3170
-# workown_ha        0.410  0.3582
+# PA1     PA2
+# explain_hs        0.603  0.1721
+# quiet_ha          0.710  0.0579
+# support_hs        0.125  0.4720 #PA2 
+# feedback_ha       0.253  0.5162 #PA2 
+# participation_ha  0.382  0.1113
+# taskhelp_ha       0.313  0.7241 #PA2 
+# pretunderstand_ha 0.664 -0.2363
+# clarification_ha  0.656 -0.0467
+# workown_ha        0.222  0.4968 #PA2 
+
+# Get variance accounted for
+t2ort2$Vaccounted
+t2ort2_var <- t2ort2$Vaccounted["Cumulative Var", "PA1"]
+print(paste("Total variance explained:", round(t2ort2_var * 100, 2), "%"))
 
 # Plot results
 par(mfrow=c(1,2))
