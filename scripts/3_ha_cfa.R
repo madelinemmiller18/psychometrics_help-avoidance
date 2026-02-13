@@ -435,10 +435,10 @@ model_llm <- '
   llm =~ taskhelp_ha + pretunderstand_ha + clarification_ha + workown_ha
 '
 
-cfa_llm <- cfa(model_llm, dfitems_llm, std.lv = TRUE)
+cfa_llm <- cfa(model_llm, dfitems_llm, std.lv = TRUE, estimator = "MLR")
 summary(cfa_llm, standardized = T, fit = T)
 # very poor fit 
-
+cor(dfitems_llm)
 ##########################################################################
 # Bifactor solution
 ##########################################################################

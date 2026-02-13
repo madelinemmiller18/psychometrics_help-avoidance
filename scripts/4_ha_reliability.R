@@ -18,10 +18,10 @@
 
 #set working directory
 print(getwd())
-# path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
-# figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/reliability/"
-path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
-figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\reliability\\"
+ path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
+ figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/reliability/"
+#path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
+#figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\reliability\\"
 setwd(path)
 
 
@@ -34,7 +34,7 @@ library(dplyr)
 # set up data
 ###############################################################
 # upload data
-rawdata <- read.csv("Help Avoidance in Group Projects.csv")
+rawdata <- read.csv("data/Help Avoidance in Group Projects.csv")
 df <- rawdata[c(3:14)]
 
 # change column names

@@ -18,10 +18,10 @@
 
 #set working directory
 print(getwd())
-# path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
-# figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/irt/"
-path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
-figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\irt\\"
+path="~/Desktop/psychometrics_foundations/psychometrics_help-avoidance"
+figures_path = "~/Desktop/psychometrics_foundations/psychometrics_help-avoidance/figures/irt/"
+#path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project"
+#figures_path = "E:\\OneDrive - UT Cloud\\UniLife\\M1 Semester1\\3_Psychometrics\\HA_Project\\figures\\irt\\"
 setwd(path)
 
 library(psych)
@@ -33,7 +33,7 @@ library(dplyr)
 # set up data
 ###############################################################
 # upload data
-rawdata <- read.csv("Help Avoidance in Group Projects.csv")
+rawdata <- read.csv("data/Help Avoidance in Group Projects.csv")
 df <- rawdata[c(3:14)]
 
 # change column names
@@ -119,9 +119,20 @@ dfitems[,"support_hs"] <- 7-dfitems[,"support_hs"]
 # Are the factor structure and item performance similar or different?
 ###############################################################
 # One factor solution
-model1.1f <- mirt(dfitems, model = 1, 'graded')
-summary(model1.1f)
+oneFactorModel <- mirt(dfitems, model = 1, 'graded')
+summary(oneFactorModel)
+coef(oneFactorModel)
 
+#two factor solution
+twoFactorModel <- mirt(dfitems, model = 2, 'graded')
+summary(twoFactorModel)
+coef(twoFactorModel)
+
+# Look at model comparison
+anova(oneFactorModel, twoFactorModel)
+
+#rotation
+summary(twoFactorModel, rotate='oblimin')
 
 ###############################################################
 # Part 2: Apply the GRM to the subset of well-performing items. 
@@ -129,14 +140,48 @@ summary(model1.1f)
 # considering both item characteristic curves and item information.
 ###############################################################
 
-###############################################################
-# Part 3: Recode items to binary responses for this exercise only 
-#(values coded as 0 or coded as 1). 
-#Using the subset of unidimensional items, compare a
-#1PL model with a 2PL model. 
-###############################################################
+# Plot the item information functions
+# (amount of information provided by the item for given ability theta)
+itemplot(oneFactorModel, 1,type='info')
+itemplot(oneFactorModel, 1)
+itemplot(twoFactorModel, 1,rotate='oblimin')
+# -> most informative for very low ability
+itemplot(oneFactorModel, 2,type='info')
+itemplot(oneFactorModel, 2)
+# -> informative a large range of low to medium ability
+itemplot(oneFactorModel, 3,type='info')
+itemplot(oneFactorModel, 3)
+# -> most informative for very medium ability
+itemplot(oneFactorModel, 4,type='info')
+itemplot(oneFactorModel, 4)
+# -> most informative for very medium ability
+itemplot(oneFactorModel, 5,type='info')
+itemplot(oneFactorModel, 5)
+# -> most informative for very medium ability
+itemplot(oneFactorModel, 6,type='info')
+itemplot(oneFactorModel, 6)
+# -> informative a large range of medium to high ability
+itemplot(oneFactorModel, 7,type='info')
+itemplot(oneFactorModel, 7)
+# -> informative a large range of medium ability
+itemplot(oneFactorModel, 8,type='info')
+itemplot(oneFactorModel, 8)
+# -> informative a range of medium ability
+itemplot(oneFactorModel, 9,type='info')
+itemplot(oneFactorModel, 9)
+# -> informative a large range of medium to high ability
 
 ###############################################################
 # Part 4: Compare self-created and LLM-generated items in terms of 
 #IRT parameters (difficulty, discrimination) and item information. 
 ###############################################################
+coef(oneFactorModel, IRTpars = TRUE, simplify = TRUE)$items
+#The a column is discrimination. 
+#Higher values (roughly: >1.5 = strong, 0.5–1.5 = moderate, <0.5 = weak) 
+#mean the item does a better job distinguishing between people at different trait levels.
+
+#Difficulty: b items
+#For a 1–6 Likert item you get up to 5 thresholds — 
+#each one is the point on the theta scale where a respondent has a 50% chance of scoring above that category boundary. 
+#Negative values mean the threshold is easy to cross (endorsed even at low trait levels); 
+#positive values mean the threshold is hard (only endorsed at high trait levels).
