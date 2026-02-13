@@ -273,6 +273,7 @@ cov_ai
 ##########################################################################
 # run model 2
 cfa2 <- cfa(model2,dfitems,std.lv=T)
+standardizedSolution(cfa2)
 
 # output
 summary(cfa2,standardized=T,fit=T)

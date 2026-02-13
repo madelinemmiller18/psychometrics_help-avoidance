@@ -244,9 +244,9 @@ coef(twoPL)
 # MEAN_1 COV_11
 # par      0      1
 
-pdf(paste0(figures_path,"twoPL.pdf"), width = 7, height = 5)
+#pdf(paste0(figures_path,"twoPL.pdf"), width = 7, height = 5)
 plot(twoPL, type = 'trace', facet_items=FALSE)
-dev.off()
+#dev.off()
 
 # Based on CFA results, test if PA2 factor items work better as a separate scale
 # PA2 items: support_hs, feedback_ha, taskhelp_ha, workown_ha
