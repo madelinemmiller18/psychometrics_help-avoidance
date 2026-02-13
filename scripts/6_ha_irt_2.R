@@ -112,6 +112,16 @@ dfitems <- df[,item_names]
 dfitems[,"explain_hs"] <- 7-dfitems[,"explain_hs"]
 dfitems[,"support_hs"] <- 7-dfitems[,"support_hs"]
 
+#split into subgroups for factors
+# Item sets
+self_items <- c("explain_hs", "quiet_ha", "support_hs", "feedback_ha", "participation_ha")
+llm_items  <- c("taskhelp_ha", "pretunderstand_ha", "clarification_ha", "workown_ha")
+
+general_items <- c("explain_hs", "quiet_ha", "participation_ha", "pretunderstand_ha", "clarification_ha")
+task_items  <- c("support_hs","feedback_ha","taskhelp_ha","workown_ha")
+
+general <- dfitems[,general_items]
+task <- dfitems[,task_items]
 
 ###############################################################
 # Part 1: Apply GRM to all items and perform EFA
@@ -128,11 +138,31 @@ twoFactorModel <- mirt(dfitems, model = 2, 'graded')
 summary(twoFactorModel)
 coef(twoFactorModel)
 
-# Look at model comparison
+#general only
+genModel <- mirt(general, model = 1, 'graded')
+#task only
+taskModel <- mirt(task, model = 1, 'graded')
+
+# Look at model comparison between one factor and two factor
 anova(oneFactorModel, twoFactorModel)
+#p = .002, significant
 
 #rotation
 summary(twoFactorModel, rotate='oblimin')
+#                       F1      F2    h2
+# explain_hs         0.1922  0.6203 0.513. #F2
+# quiet_ha          -0.0377  0.9760 0.926. #F2
+# support_hs         0.5451  0.0715 0.332. #F1 *
+# feedback_ha        0.5003  0.2056 0.371. #F1 *
+# participation_ha   0.2544  0.3122 0.223. #F2
+# taskhelp_ha        0.9569 -0.0195 0.902. #F1 *
+# pretunderstand_ha -0.1025  0.6151 0.341. #F2
+# clarification_ha   0.1167  0.5305 0.342. #F2
+# workown_ha         0.6125 -0.0583 0.351. #F1 *
+# Factor correlations: 
+#   F1 F2
+# F1 1.000   
+# F2 0.381  1
 
 ###############################################################
 # Part 2: Apply the GRM to the subset of well-performing items. 
@@ -142,40 +172,124 @@ summary(twoFactorModel, rotate='oblimin')
 
 # Plot the item information functions
 # (amount of information provided by the item for given ability theta)
-itemplot(oneFactorModel, 1,type='info')
-itemplot(oneFactorModel, 1)
-itemplot(twoFactorModel, 1,rotate='oblimin')
-# -> most informative for very low ability
-itemplot(oneFactorModel, 2,type='info')
-itemplot(oneFactorModel, 2)
-# -> informative a large range of low to medium ability
-itemplot(oneFactorModel, 3,type='info')
-itemplot(oneFactorModel, 3)
-# -> most informative for very medium ability
-itemplot(oneFactorModel, 4,type='info')
-itemplot(oneFactorModel, 4)
-# -> most informative for very medium ability
-itemplot(oneFactorModel, 5,type='info')
-itemplot(oneFactorModel, 5)
-# -> most informative for very medium ability
-itemplot(oneFactorModel, 6,type='info')
-itemplot(oneFactorModel, 6)
-# -> informative a large range of medium to high ability
-itemplot(oneFactorModel, 7,type='info')
-itemplot(oneFactorModel, 7)
-# -> informative a large range of medium ability
-itemplot(oneFactorModel, 8,type='info')
+
+# Highest difficulty: 2 (.54), 9 (.41)
+itemplot(genModel, 2,type='info')
+itemplot(genModel, 2)
+
+itemplot(taskModel, 4,type='info')
+itemplot(taskModel, 4)
+
+
+# Lowest difficulty: 4, 5 (.26)
+#4
+itemplot(taskModel, 2,type='info')
+itemplot(taskModel, 2)
+#5 
+itemplot(genModel, 3,type='info')
+itemplot(genModel, 3)
+
+
+#Higher Variance: items 8, 9 (>=2.20)
+#8
+itemplot(genModel, 5,type='info')
 itemplot(oneFactorModel, 8)
-# -> informative a range of medium ability
-itemplot(oneFactorModel, 9,type='info')
+#9
+itemplot(taskModel, 4,type='info')
+itemplot(taskModel, 4)
+
+#worse scale correlation: item 5
+itemplot(genModel, 3,type='info')
+itemplot(genModel, 3)
+
+########### Self
+itemplot(genModel, 1,type='info')
+itemplot(twoFactorModel, 1, type='info')
+itemplot(twoFactorModel, 1,rotate='oblimin')
+# -> most informative for
+itemplot(genModel, 2,type='info')
+itemplot(twoFactorModel, 2, type='info')
+itemplot(twoFactorModel, 2,rotate='oblimin')
+# -> most informative for
+itemplot(taskModel, 1,type='info')
+itemplot(taskModel, 1)
+itemplot(twoFactorModel, 3,type='info',rotate='oblimin')
+itemplot(twoFactorModel, 3,rotate='oblimin')
+# -> most informative for
+itemplot(taskModel, 2,type='info')
+itemplot(taskModel, 2)
+itemplot(oneFactorModel, 4)
+# -> most informative for
+itemplot(genModel, 3,type='info')
+itemplot(oneFactorModel, 5)
+
+########### LLM
+# -> most informative for very medium ability
+itemplot(taskModel, 3,type='info')
+itemplot(oneFactorModel, 6)
+# -> most informative for
+itemplot(genModel, 4,type='info')
+itemplot(oneFactorModel, 7)
+# -> most informative for
+itemplot(genModel, 5,type='info')
+itemplot(oneFactorModel, 8)
+# -> most informative for
+itemplot(taskModel, 4,type='info')
 itemplot(oneFactorModel, 9)
-# -> informative a large range of medium to high ability
+# -> most informative for
+
+# Define the 2-factor cfa model
+GenTask<- mirt.model('
+     PA1 = 1, 2, 5, 7, 8      # PA1: explain_hs, quiet_ha, participation_ha, pretunderstand_ha, clarification_ha
+     PA2 = 3, 4, 6, 9         # PA2: support_hs, feedback_ha, taskhelp_ha, workown_ha
+     COV = PA1*PA2')
+
+GenTaskCFA <- mirt(dfitems, irt.model1, 'graded')
+
+
+
+# Calculate EAP factor scores
+EAPscores <- fscores(GenTaskCFA, method = 'EAP')
+# EAPscores is a matrix with two columns (PA1 and PA2)
+colnames(EAPscores)  # check factor names
+# Plot histograms separately
+hist(EAPscores[, "F1"], main="General Factor Scores", xlab="EAP Score")
+hist(EAPscores[, "F2"], main="Task Factor Scores", xlab="EAP Score")
+
+
+# Calculate the factor score estimates
+EAPscores <- fscores(twoFactorModel)
+# Plot them as histogram
+hist(EAPscores)
+# -> values between -3 and 2, most close to zero
+# Compare factor score estimate and average test score per person
+testscore <- apply(dat1[,y1nom[3:6]], 1, mean)
+plot(testscore, EAPscores)
+# Calculate the correlation
+cor(testscore, EAPscores)
+# 0.9801343 -> very high
 
 ###############################################################
 # Part 4: Compare self-created and LLM-generated items in terms of 
 #IRT parameters (difficulty, discrimination) and item information. 
 ###############################################################
-coef(oneFactorModel, IRTpars = TRUE, simplify = TRUE)$items
+
+coef <- coef(oneFactorModel, IRTpars = TRUE, simplify = TRUE)$items
+
+coef[self_items, ]
+#                       a         b1         b2         b3        b4       b5
+# explain_hs       1.7915344 -1.2803470  0.3492198  0.9999901 1.8099536 2.307154
+# quiet_ha         2.5059875 -1.7629366 -0.6742703 -0.1932783 0.2420704 1.960497
+# support_hs       0.6979437 -2.9632289 -0.3596673  2.2498399 3.4654230 5.601548
+# feedback_ha      0.9232720 -0.7784672  0.2959237  1.7926589 4.3706300       NA
+# participation_ha 0.9321358 -1.5271576  1.2223877  2.1472479 2.3946904       NA
+coef[llm_items, ]
+#                       a        b1         b2        b3       b4       b5
+# taskhelp_ha       1.0930589 -1.543087  0.1275698 1.5706410 3.153114 3.816146
+# pretunderstand_ha 1.1232138 -1.717369 -0.2152491 0.7668479 1.789772 3.070443
+# clarification_ha  1.3113298 -1.003087  0.2972739 1.2891363 1.802129 2.871991
+# workown_ha        0.6669778 -2.507638 -0.4759231 0.6758068 2.296755 4.748062
+
 #The a column is discrimination. 
 #Higher values (roughly: >1.5 = strong, 0.5–1.5 = moderate, <0.5 = weak) 
 #mean the item does a better job distinguishing between people at different trait levels.
@@ -185,3 +299,7 @@ coef(oneFactorModel, IRTpars = TRUE, simplify = TRUE)$items
 #each one is the point on the theta scale where a respondent has a 50% chance of scoring above that category boundary. 
 #Negative values mean the threshold is easy to cross (endorsed even at low trait levels); 
 #positive values mean the threshold is hard (only endorsed at high trait levels).
+
+#information
+
+
